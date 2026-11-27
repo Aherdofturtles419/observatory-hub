@@ -2,21 +2,22 @@
 <html lang="en">
 <head>
   <meta charset="utf-8">
-  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
   <title>Hub Mockup (Desktop)</title>
   <!-- MOCKUP ONLY: fake data, no connection to NINA or any hardware. -->
   <style>
-    :root { --bg: #111; --card: #1c1c1c; --text: #ddd; --muted: #888; --stop: #c62828; }
+    :root { --bg: #111; --card: #1c1c1c; --text: #ddd; --muted: #888; --stop: #c62828; color-scheme: dark; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
-    header { position: sticky; top: 0; display: flex; align-items: center; gap: 16px; padding: 12px 24px;
+    header { position: sticky; top: env(safe-area-inset-top, 0px); display: flex; align-items: center; gap: 16px; padding: 12px max(24px, env(safe-area-inset-right, 0px)) 12px max(24px, env(safe-area-inset-left, 0px)); flex-wrap: wrap;
              background: #000; border-bottom: 1px solid #333; }
     h1 { font-size: 1.2rem; margin: 0; }
     .muted { color: var(--muted); font-size: 0.9rem; }
     .spacer { flex: 1; }
     .stop { padding: 12px 32px; font-size: 1.1rem; font-weight: bold; border: 0; border-radius: 8px;
             background: var(--stop); color: #fff; }
-    main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 24px; }
+    main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); }
+    @media (max-width: 700px) { main { grid-template-columns: 1fr; } .wide { grid-column: auto; grid-row: auto; } }
     section { background: var(--card); border-radius: 8px; padding: 16px; min-height: 120px; }
     .wide { grid-column: span 2; grid-row: span 2; }
     .full { grid-column: 1 / -1; }
@@ -30,8 +31,9 @@
     <span class="muted">Rig picker goes here</span>
     <span class="spacer"></span>
     <span class="muted">NINA: simulated</span>
-    <button class="stop" type="button" onclick="alert('Mockup: STOP pressed (nothing happens)')">STOP</button>
+    <button class="stop" type="button" onclick="document.getElementById('stop-msg').hidden=false">STOP</button>
   </header>
+  <p id="stop-msg" class="muted" style="padding: 8px 24px 0; margin: 0" hidden>Mockup: STOP pressed. Nothing is connected, so nothing happened.</p>
 
   <main>
     <section class="wide"><h2>Latest frame</h2><p class="placeholder">Large preview image goes here</p></section>
