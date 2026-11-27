@@ -1,0 +1,46 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hub Mockup (Desktop)</title>
+  <!-- MOCKUP ONLY: fake data, no connection to NINA or any hardware. -->
+  <style>
+    :root { --bg: #111; --card: #1c1c1c; --text: #ddd; --muted: #888; --stop: #c62828; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
+    header { position: sticky; top: 0; display: flex; align-items: center; gap: 16px; padding: 12px 24px;
+             background: #000; border-bottom: 1px solid #333; }
+    h1 { font-size: 1.2rem; margin: 0; }
+    .muted { color: var(--muted); font-size: 0.9rem; }
+    .spacer { flex: 1; }
+    .stop { padding: 12px 32px; font-size: 1.1rem; font-weight: bold; border: 0; border-radius: 8px;
+            background: var(--stop); color: #fff; }
+    main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 24px; }
+    section { background: var(--card); border-radius: 8px; padding: 16px; min-height: 120px; }
+    .wide { grid-column: span 2; grid-row: span 2; }
+    .full { grid-column: 1 / -1; }
+    h2 { font-size: 1rem; margin: 0 0 8px; }
+    .placeholder { color: var(--muted); font-style: italic; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Observatory Hub</h1>
+    <span class="muted">Rig picker goes here</span>
+    <span class="spacer"></span>
+    <span class="muted">NINA: simulated</span>
+    <button class="stop" type="button" onclick="alert('Mockup: STOP pressed (nothing happens)')">STOP</button>
+  </header>
+
+  <main>
+    <section class="wide"><h2>Latest frame</h2><p class="placeholder">Large preview image goes here</p></section>
+    <section><h2>Mount</h2><p class="placeholder">RA/Dec, tracking, parked</p></section>
+    <section><h2>Camera</h2><p class="placeholder">Temperature, cooler power</p></section>
+    <section><h2>Sequence</h2><p class="placeholder">Target, frames done, time left</p></section>
+    <section><h2>Controls</h2><p class="placeholder">Park / Unpark, Slew to target</p></section>
+    <section><h2>Weather / Roof (later)</h2><p class="placeholder">Placeholder for future hardware</p></section>
+    <section class="full"><h2>Log</h2><p class="placeholder">Recent events</p></section>
+  </main>
+</body>
+</html>

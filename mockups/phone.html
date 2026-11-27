@@ -1,0 +1,38 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1">
+  <title>Hub Mockup (Phone)</title>
+  <!-- MOCKUP ONLY: fake data, no connection to NINA or any hardware. -->
+  <style>
+    :root { --bg: #111; --card: #1c1c1c; --text: #ddd; --muted: #888; --stop: #c62828; }
+    * { box-sizing: border-box; }
+    body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; padding: 16px 16px 96px; }
+    header { display: flex; justify-content: space-between; align-items: center; margin-bottom: 12px; }
+    h1 { font-size: 1.1rem; margin: 0; }
+    .muted { color: var(--muted); font-size: 0.85rem; }
+    section { background: var(--card); border-radius: 8px; padding: 12px; margin-bottom: 12px; }
+    h2 { font-size: 0.95rem; margin: 0 0 6px; }
+    .placeholder { color: var(--muted); font-style: italic; }
+    .stop { position: fixed; left: 16px; right: 16px; bottom: 16px; padding: 18px; font-size: 1.2rem; font-weight: bold;
+            border: 0; border-radius: 8px; background: var(--stop); color: #fff; }
+  </style>
+</head>
+<body>
+  <header>
+    <h1>Observatory Hub</h1>
+    <span class="muted">NINA: simulated</span>
+  </header>
+
+  <section><h2>Rig</h2><p class="placeholder">Rig picker goes here</p></section>
+  <section><h2>Mount</h2><p class="placeholder">RA/Dec, tracking, parked</p></section>
+  <section><h2>Camera</h2><p class="placeholder">Temperature, cooler power</p></section>
+  <section><h2>Sequence</h2><p class="placeholder">Target, frames done, time left</p></section>
+  <section><h2>Latest frame</h2><p class="placeholder">Preview image goes here</p></section>
+  <section><h2>Controls</h2><p class="placeholder">Park / Unpark, Slew to target</p></section>
+  <section><h2>Log</h2><p class="placeholder">Recent events</p></section>
+
+  <button class="stop" type="button" onclick="alert('Mockup: STOP pressed (nothing happens)')">STOP</button>
+</body>
+</html>
