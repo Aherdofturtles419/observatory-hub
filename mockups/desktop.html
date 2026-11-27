@@ -6,23 +6,47 @@
   <title>Hub Mockup (Desktop)</title>
   <!-- MOCKUP ONLY: fake data, no connection to NINA or any hardware. -->
   <style>
-    :root { --bg: #111; --card: #1c1c1c; --text: #ddd; --muted: #888; --stop: #c62828; color-scheme: dark; }
+    :root { --bg: #111; --card: #1c1c1c; --line: #2e2e2e; --text: #ddd; --muted: #888; --stop: #c62828;
+            --ok: #5cb88a; --warn: #e0b04f; --move: #e05a4f; color-scheme: dark; }
     * { box-sizing: border-box; }
     body { margin: 0; background: var(--bg); color: var(--text); font-family: system-ui, sans-serif; }
-    header { position: sticky; top: env(safe-area-inset-top, 0px); display: flex; align-items: center; gap: 16px; padding: 12px max(24px, env(safe-area-inset-right, 0px)) 12px max(24px, env(safe-area-inset-left, 0px)); flex-wrap: wrap;
+    header { position: sticky; top: env(safe-area-inset-top, 0px); z-index: 5; display: flex; align-items: center; gap: 16px;
+             padding: 12px max(24px, env(safe-area-inset-right, 0px)) 12px max(24px, env(safe-area-inset-left, 0px)); flex-wrap: wrap;
              background: #000; border-bottom: 1px solid #333; }
     h1 { font-size: 1.2rem; margin: 0; }
     .muted { color: var(--muted); font-size: 0.9rem; }
     .spacer { flex: 1; }
     .stop { padding: 12px 32px; font-size: 1.1rem; font-weight: bold; border: 0; border-radius: 8px;
             background: var(--stop); color: #fff; }
-    main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px; padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); }
-    @media (max-width: 700px) { main { grid-template-columns: 1fr; } .wide { grid-column: auto; grid-row: auto; } }
-    section { background: var(--card); border-radius: 8px; padding: 16px; min-height: 120px; }
-    .wide { grid-column: span 2; grid-row: span 2; }
+    main { display: grid; grid-template-columns: 1fr 1fr 1fr; gap: 16px;
+           padding: 24px max(24px, env(safe-area-inset-right, 0px)) 24px max(24px, env(safe-area-inset-left, 0px)); }
+    section { background: var(--card); border-radius: 8px; padding: 16px; min-height: 120px; min-width: 0; }
+    .wide { grid-column: span 2; grid-row: span 2; display: flex; flex-direction: column; gap: 10px; }
+    .span2 { grid-column: span 2; }
     .full { grid-column: 1 / -1; }
+    @media (max-width: 700px) {
+      main { grid-template-columns: 1fr; }
+      .wide, .span2 { grid-column: auto; grid-row: auto; }
+    }
     h2 { font-size: 1rem; margin: 0 0 8px; }
     .placeholder { color: var(--muted); font-style: italic; }
+
+    /* 3D mount view */
+    .card-head { display: flex; flex-wrap: wrap; align-items: center; gap: 8px 12px; }
+    .card-head h2 { margin: 0; }
+    .badge { font-size: 0.7rem; letter-spacing: 0.06em; text-transform: uppercase; color: var(--warn);
+             border: 1px solid var(--warn); border-radius: 4px; padding: 1px 6px; }
+    .card-head label { display: flex; align-items: center; gap: 6px; font-size: 0.85rem; color: var(--muted); }
+    select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 4px 6px; font: inherit; }
+    .view3d { position: relative; flex: 1; min-height: 380px; border-radius: 6px; overflow: hidden; background: #05070a; }
+    .hint { position: absolute; left: 10px; bottom: 8px; font-size: 0.75rem; color: var(--muted); pointer-events: none; }
+
+    /* Mount readouts */
+    .status { font-weight: 600; margin: 0 0 8px; }
+    .status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.move { color: var(--move); }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 3px 12px; margin: 0; font-size: 0.9rem; }
+    dt { color: var(--muted); }
+    dd { margin: 0; text-align: right; font-family: ui-monospace, Menlo, Consolas, monospace; font-variant-numeric: tabular-nums; }
   </style>
 </head>
 <body>
@@ -36,13 +60,83 @@
   <p id="stop-msg" class="muted" style="padding: 8px 24px 0; margin: 0" hidden>Mockup: STOP pressed. Nothing is connected, so nothing happened.</p>
 
   <main>
-    <section class="wide"><h2>Latest frame</h2><p class="placeholder">Large preview image goes here</p></section>
-    <section><h2>Mount</h2><p class="placeholder">RA/Dec, tracking, parked</p></section>
+    <section class="wide">
+      <div class="card-head">
+        <h2>Mount view</h2>
+        <span class="badge">Simulated · clock 200×</span>
+        <span class="spacer"></span>
+        <label for="demo-target">Demo target <select id="demo-target"></select></label>
+      </div>
+      <div class="view3d" id="view3d">
+        <span class="hint">Drag to orbit · scroll to zoom · dashed line = where the scope should point</span>
+      </div>
+    </section>
+
+    <section><h2>Latest frame</h2><p class="placeholder">Preview image goes here</p></section>
+
+    <section>
+      <h2>Mount</h2>
+      <p class="status" id="m-status">—</p>
+      <dl>
+        <dt>Target</dt><dd id="m-target">—</dd>
+        <dt>RA / Dec</dt><dd id="m-radec">—</dd>
+        <dt>Hour angle</dt><dd id="m-ha">—</dd>
+        <dt>Altitude</dt><dd id="m-alt">—</dd>
+        <dt>Scope side</dt><dd id="m-side">—</dd>
+        <dt>Sidereal time</dt><dd id="m-lst">—</dd>
+      </dl>
+    </section>
+
     <section><h2>Camera</h2><p class="placeholder">Temperature, cooler power</p></section>
     <section><h2>Sequence</h2><p class="placeholder">Target, frames done, time left</p></section>
     <section><h2>Controls</h2><p class="placeholder">Park / Unpark, Slew to target</p></section>
     <section><h2>Weather / Roof (later)</h2><p class="placeholder">Placeholder for future hardware</p></section>
-    <section class="full"><h2>Log</h2><p class="placeholder">Recent events</p></section>
+    <section class="span2"><h2>Log</h2><p class="placeholder">Recent events</p></section>
   </main>
+
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+  <script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+  <script src="mount3d.js"></script>
+  <script>
+  (function () {
+    // Fake data driver. Later this is replaced by mount status polled from the hub (which asks NINA).
+    const { TARGETS, solve, fmtH, fmtD, R2D } = Mount3D;
+    const $ = (id) => document.getElementById(id);
+    const SPEED = 200;   // demo clock: sidereal seconds per real second
+
+    const sel = $("demo-target");
+    for (const [key, t] of Object.entries(TARGETS)) {
+      const o = document.createElement("option"); o.value = key; o.textContent = t.name; sel.appendChild(o);
+    }
+    sel.value = "m31";
+
+    let lst = 3.0, t, sol, below;
+    Mount3D.create($("view3d"), {
+      cameraPos: [3.0, 2.5, 3.7],
+      update(dt) {
+        lst = (lst + dt * SPEED / 3600) % 24;
+        t = TARGETS[sel.value];
+        sol = solve(t, lst); below = false;
+        if (!t.park && sol.alt < 0) { below = true; sol = solve(TARGETS.park, lst); }
+        return { sol, roofOpen: 1 };
+      },
+      after({ slewing }) {
+        const st = $("m-status");
+        if (below) { st.textContent = "Target below horizon, staying parked"; st.className = "status warn"; }
+        else if (slewing) { st.textContent = "Slewing…"; st.className = "status move"; }
+        else if (t.park) { st.textContent = "Parked"; st.className = "status ok"; }
+        else { st.textContent = "Tracking"; st.className = "status ok"; }
+
+        const s = t.park ? null : solve(t, lst);
+        $("m-target").textContent = t.park ? "Park" : t.name.split(" ")[0];
+        $("m-radec").textContent = t.park ? "—" : `${fmtH(t.ra)}  ${fmtD(t.dec)}`;
+        $("m-ha").textContent = s ? fmtH(s.H) : "—";
+        $("m-alt").textContent = s ? `${(s.alt * R2D).toFixed(1)}°` : "—";
+        $("m-side").textContent = sol.side;
+        $("m-lst").textContent = fmtH(lst);
+      }
+    });
+  })();
+  </script>
 </body>
 </html>
