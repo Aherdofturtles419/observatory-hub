@@ -1,0 +1,175 @@
+<!doctype html>
+<html lang="en">
+<head>
+  <meta charset="utf-8">
+  <meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+  <title>AM3 Mount 3D Mockup</title>
+  <!-- MOCKUP ONLY: fake sky data, no connection to NINA or any hardware. -->
+  <link rel="stylesheet" href="https://fonts.googleapis.com/css2?family=IBM+Plex+Sans:wght@400;600&family=IBM+Plex+Mono:wght@400;500&display=swap">
+  <style>
+    /* Layout: 3D view on top (phone) or left (desktop), readouts and fake-data controls beside it. Single dark look for night use. */
+    :root {
+      --bg: #0d1014; --panel: #161b22; --line: #2a323d; --text: #d6dde6; --muted: #8592a3;
+      --accent: #e05a4f; --ok: #5cb88a; --warn: #e0b04f;
+      --sans: "IBM Plex Sans", system-ui, sans-serif; --mono: "IBM Plex Mono", ui-monospace, monospace;
+      color-scheme: dark;
+    }
+    * { box-sizing: border-box; }
+    html, body { margin: 0; background: var(--bg); color: var(--text); font-family: var(--sans); }
+    .wrap { padding: 16px max(16px, env(safe-area-inset-right, 0px)) 24px max(16px, env(safe-area-inset-left, 0px));
+            display: grid; gap: 16px; max-width: 1280px; margin: 0 auto; }
+    header { display: flex; flex-wrap: wrap; align-items: baseline; gap: 8px 16px; }
+    h1 { font-size: 1.15rem; margin: 0; text-wrap: balance; }
+    .badge { font-family: var(--mono); font-size: 0.75rem; letter-spacing: 0.06em; text-transform: uppercase;
+             color: var(--warn); border: 1px solid var(--warn); border-radius: 4px; padding: 2px 6px; }
+    .layout { display: grid; gap: 16px; }
+    @media (min-width: 900px) { .layout { grid-template-columns: minmax(0, 1fr) 320px; } }
+    .view { position: relative; height: min(62vh, 600px); min-height: 320px; border: 1px solid var(--line);
+            border-radius: 8px; overflow: hidden; background: #05070a; }
+    .hint { position: absolute; left: 10px; bottom: 8px; font-size: 0.75rem; color: var(--muted); pointer-events: none; }
+    .panel { background: var(--panel); border: 1px solid var(--line); border-radius: 8px; padding: 14px;
+             display: grid; gap: 14px; align-content: start; min-width: 0; }
+    h2 { font-size: 0.75rem; text-transform: uppercase; letter-spacing: 0.08em; color: var(--muted); margin: 0 0 6px; font-weight: 600; }
+    .status { font-weight: 600; font-size: 1.05rem; }
+    .status.ok { color: var(--ok); } .status.warn { color: var(--warn); } .status.move { color: var(--accent); }
+    dl { display: grid; grid-template-columns: auto 1fr; gap: 4px 12px; margin: 0; font-size: 0.9rem; }
+    dt { color: var(--muted); }
+    dd { margin: 0; font-family: var(--mono); font-variant-numeric: tabular-nums; text-align: right; }
+    label { display: grid; gap: 4px; font-size: 0.85rem; color: var(--muted); }
+    select, input[type=range] { width: 100%; }
+    select { background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px; padding: 6px; font: inherit; }
+    input[type=range] { accent-color: var(--accent); }
+    .speeds { display: flex; gap: 6px; flex-wrap: wrap; }
+    .speeds button { flex: 1; background: var(--bg); color: var(--text); border: 1px solid var(--line); border-radius: 6px;
+                     padding: 6px 8px; font: 500 0.85rem var(--mono); cursor: pointer; }
+    .speeds button[aria-pressed="true"] { border-color: var(--accent); color: var(--accent); }
+    button:focus-visible, select:focus-visible, input:focus-visible { outline: 2px solid var(--accent); outline-offset: 2px; }
+    .note { font-size: 0.8rem; color: var(--muted); margin: 0; line-height: 1.45; }
+    .val { font-family: var(--mono); color: var(--text); }
+  </style>
+</head>
+<body>
+<div class="wrap">
+  <header>
+    <h1>AM3 Mount 3D Mockup</h1>
+    <span class="badge">Simulated data</span>
+  </header>
+
+  <div class="layout">
+    <div class="view" id="view">
+      <span class="hint">Drag to orbit · pinch or scroll to zoom · dashed line = where the scope should point</span>
+    </div>
+
+    <div class="panel">
+      <div>
+        <h2>Status</h2>
+        <div class="status" id="status">Tracking</div>
+      </div>
+
+      <div>
+        <h2>Mount (fake)</h2>
+        <dl>
+          <dt>Target</dt><dd id="r-target">—</dd>
+          <dt>RA</dt><dd id="r-ra">—</dd>
+          <dt>Dec</dt><dd id="r-dec">—</dd>
+          <dt>Sidereal time</dt><dd id="r-lst">—</dd>
+          <dt>Hour angle</dt><dd id="r-ha">—</dd>
+          <dt>Altitude</dt><dd id="r-alt">—</dd>
+          <dt>Scope side</dt><dd id="r-side">—</dd>
+          <dt>RA axis</dt><dd id="r-ax1">—</dd>
+          <dt>Dec axis</dt><dd id="r-ax2">—</dd>
+        </dl>
+      </div>
+
+      <div>
+        <h2>Fake data controls</h2>
+        <div style="display:grid; gap:12px">
+          <label for="target">Target
+            <select id="target"></select>
+          </label>
+          <label for="lst">Sidereal time: <span class="val" id="lst-val"></span>
+            <input id="lst" type="range" min="0" max="24" step="0.01" value="3">
+          </label>
+          <div>
+            <h2 style="margin-bottom:6px">Clock speed</h2>
+            <div class="speeds" id="speeds">
+              <button type="button" data-speed="0">Pause</button>
+              <button type="button" data-speed="1">1×</button>
+              <button type="button" data-speed="200" aria-pressed="true">200×</button>
+              <button type="button" data-speed="2000">2000×</button>
+            </div>
+          </div>
+          <label for="roof">Roll-off roof: <span class="val" id="roof-val"></span>
+            <input id="roof" type="range" min="0" max="100" step="1" value="100">
+          </label>
+        </div>
+      </div>
+
+      <p class="note">Latitude is set to 40° N. Drag the sidereal time slider past a target's meridian
+        (hour angle 0) to watch the meridian flip. The observatory building is a placeholder until you pick a design.</p>
+    </div>
+  </div>
+</div>
+
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/build/three.min.js"></script>
+<script src="https://cdn.jsdelivr.net/npm/three@0.128.0/examples/js/controls/OrbitControls.js"></script>
+<script src="mount3d.js"></script>
+<script>
+(function () {
+  const { TARGETS, solve, fmtH, fmtD, fmtA, R2D } = Mount3D;
+  const $ = (id) => document.getElementById(id);
+
+  const sel = $("target");
+  for (const [key, t] of Object.entries(TARGETS)) {
+    const o = document.createElement("option"); o.value = key; o.textContent = t.name; sel.appendChild(o);
+  }
+  sel.value = "m31";
+
+  let lst = 3.0;        // local sidereal time, hours
+  let speed = 200;      // sidereal seconds per real second
+  let roofOpen = 1;     // 0..1
+  $("lst").addEventListener("input", (e) => { lst = parseFloat(e.target.value); });
+  $("roof").addEventListener("input", (e) => { roofOpen = e.target.value / 100; });
+  $("speeds").addEventListener("click", (e) => {
+    const b = e.target.closest("button"); if (!b) return;
+    speed = parseFloat(b.dataset.speed);
+    for (const x of $("speeds").children) x.setAttribute("aria-pressed", x === b ? "true" : "false");
+  });
+
+  let t, sol, below;
+  Mount3D.create($("view"), {
+    update(dt) {
+      lst = (lst + dt * speed / 3600) % 24;   // advance the fake sidereal clock
+      t = TARGETS[sel.value];
+      sol = solve(t, lst); below = false;
+      if (!t.park && sol.alt < 0) { below = true; sol = solve(TARGETS.park, lst); }
+      return { sol, roofOpen };
+    },
+    after({ ax1, ax2, slewing }) {
+      $("lst").value = lst.toFixed(2);
+      $("lst-val").textContent = fmtH(lst);
+      $("roof-val").textContent = `${Math.round(roofOpen * 100)}% open`;
+
+      const st = $("status");
+      if (below) { st.textContent = "Target below horizon — staying parked"; st.className = "status warn"; }
+      else if (slewing) { st.textContent = "Slewing…"; st.className = "status move"; }
+      else if (t.park) { st.textContent = "Parked"; st.className = "status ok"; }
+      else if (roofOpen < 0.95) { st.textContent = "Tracking (roof not fully open)"; st.className = "status warn"; }
+      else { st.textContent = "Tracking"; st.className = "status ok"; }
+
+      const s = t.park ? null : solve(t, lst);
+      $("r-target").textContent = t.park ? "Park" : t.name.split(" ")[0];
+      $("r-ra").textContent = t.park ? "—" : fmtH(t.ra);
+      $("r-dec").textContent = t.park ? "—" : fmtD(t.dec);
+      $("r-lst").textContent = fmtH(lst);
+      $("r-ha").textContent = s ? fmtH(s.H) : "—";
+      $("r-alt").textContent = s ? `${(s.alt * R2D).toFixed(1)}°` : "—";
+      $("r-side").textContent = sol.side;
+      $("r-ax1").textContent = fmtA(ax1);
+      $("r-ax2").textContent = fmtA(ax2);
+    }
+  });
+})();
+</script>
+</body>
+</html>
